@@ -16,9 +16,12 @@ int main (int argc, char *argv[])
     if(myid == 0) printf("number of processes: %d\n",numprocs);
     printf( "%s: Hello world from process %d \n", processor_name, myid);
 
-    idx_t a = 0;
-    printf("len of a is %d\n", sizeof(a));
-
+    if (myid == 0) {
+        idx_t a = 0;
+        printf("len of a is %d\n", sizeof(a));
+        long long b = 0;
+        printf("len of b is %d\n", sizeof(b));
+    }
     MPI_Finalize();
     return 0;
 }
