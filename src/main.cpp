@@ -49,7 +49,7 @@ int main (int argc, char *argv[]) {
 
     delete[] path;
 
-    idx_t *vtxdist, *xadj, *adjcny, wgtflag, numflag, *ncon, *nparts, *options, *edgecut, *part;
+    idx_t *vtxdist, *xadj, *adjcny, wgtflag, numflag, ncon, nparts, *options, edgecut, *part;
     MPI_Comm comm;
     real_t *tpwgts, *ubvec;
     vtxdist = new idx_t[numprocs + 1];
@@ -82,8 +82,8 @@ int main (int argc, char *argv[]) {
 
     wgtflag = 0;
     numflag = 0;
-    ncon = new idx_t(1);
-    nparts = new idx_t(4);
+    ncon = 0;
+    nparts = 4;
 
     tpwgts = new real_t[1 * 4];
     ubvec = new real_t[4];
@@ -93,7 +93,7 @@ int main (int argc, char *argv[]) {
     }
     options = new idx_t[5];
     options[0] = 0;
-    edgecut = new idx_t(0);
+    edgecut = 0;
     part = new idx_t[vertexNum / numprocs];
     part[vertexNum / numprocs - 1] = 1;
     comm = MPI_COMM_WORLD;
@@ -115,11 +115,13 @@ int main (int argc, char *argv[]) {
     }
     cout << endl;
 
-    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, ncon, nparts, tpwgts, ubvec, options,
-                         edgecut, part, &comm);
+    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
+                         &edgecut, part, &comm);
     for (i = 0; i <= vertexNum / numprocs; i++) {
         printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
+    delete[] vtxdist;
+
     MPI_Finalize();
     return 0;
 }
