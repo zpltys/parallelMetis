@@ -98,12 +98,12 @@ int main (int argc, char *argv[])
     comm = new MPI_Comm(MPI_COMM_WORLD);
 
     printf("run func!\n");
+    cout << "vtxdist: ";
+    for (i = 0; i <= numprocs; i++) {
+        cout << vtxdist[i] << " ";
+    }
+    cout << endl;
     if(myid == 1) {
-        cout << "vtxdist: ";
-        for (i = 0; i <= numprocs; i++) {
-            cout << vtxdist[i] << " ";
-        }
-        cout << endl;
         cout << "xadj: ";
         for (i = vertexNum / numprocs; i <= vertexNum / numprocs; i++) {
             cout << xadj[i] << " ";
