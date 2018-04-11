@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
     for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     idx_t bx = vtxdist[myid];
     i = 0; j = 0;
-    adjcny[j++] = 0;
+    xadj[j++] = 0;
     for (vector<edge>::iterator it = e.begin(); it != e.end(); it++) {
         x = it->x;
         y = it->y;
