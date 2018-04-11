@@ -8,7 +8,7 @@
 using namespace std;
 
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
-const int vertexNum = 1024;
+const int vertexNum = 32768;
 
 struct edge {
     idx_t x, y;
