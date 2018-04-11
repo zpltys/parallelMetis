@@ -1,11 +1,13 @@
 #include "../include/parmetis.h"
 #include <cstdio>
+#include <cstring>
+#include <string>
 
+char* prePath = "/mnt/nfs/zpltys/tempDir/";
 int main (int argc, char *argv[])
-//      int argc;
-//      char *argv[];
 {
     int myid, numprocs, namelen;
+    int i;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
 
     MPI_Init (&argc, &argv);        /* starts MPI */
@@ -16,12 +18,15 @@ int main (int argc, char *argv[])
     if(myid == 0) printf("number of processes: %d\n",numprocs);
     printf( "%s: Hello world from process %d \n", processor_name, myid);
 
-    if (myid == 0) {
-        idx_t a = 0;
-        printf("len of a is %d\n", sizeof(a));
-        long long b = 0;
-        printf("len of b is %d\n", sizeof(b));
+    char *path = new char[strlen(prePath) + 20];
+    sprintf(path, "%sG.%d", prePath, myid);
+    FILE* fp = fopen(path, "r");
+
+    idx_t x, y;
+    while(~fscanf(fp, "%d%d", &x, &y)){
+        printf("x:%d y:%d\n", x, y);
     }
+
     MPI_Finalize();
     return 0;
 }
