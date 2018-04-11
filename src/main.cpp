@@ -115,6 +115,11 @@ int main (int argc, char *argv[]) {
     }
     cout << endl;
 
+    if (myid == 1) {
+        while (true) {
+
+        }
+    }
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
     for (i = 0; i <= vertexNum / numprocs; i++) {
