@@ -82,7 +82,7 @@ int main (int argc, char *argv[]) {
 
     wgtflag = 0;
     numflag = 0;
-    ncon = 0;
+    ncon = 1;
     nparts = 4;
 
     tpwgts = new real_t[1 * 4];
