@@ -97,7 +97,7 @@ int main (int argc, char *argv[]) {
     part = new idx_t[vertexNum / numprocs];
     comm = MPI_COMM_WORLD;
 
-    printf("run func!\n");
+    printf("process %d run func!\n", myid);
     cout << "vtxdist: ";
     for (i = 0; i <= numprocs; i++) {
         cout << vtxdist[i] << " ";
