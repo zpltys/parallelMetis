@@ -115,7 +115,7 @@ int main (int argc, char *argv[]) {
     }
     cout << endl;
 
-    if (myid == 1) {
+    if (myid != 2) {
         while (true) {
 
         }
