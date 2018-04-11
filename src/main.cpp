@@ -105,12 +105,12 @@ int main (int argc, char *argv[])
         }
         cout << endl;
         cout << "xadj: ";
-        for (i = 0; i <= vertexNum / numprocs; i++) {
+        for (i = vertexNum / numprocs; i <= vertexNum / numprocs; i++) {
             cout << xadj[i] << " ";
         }
         cout << endl;
         cout << "adjcny: ";
-        for (i = 0; i < xadj[vertexNum / numprocs]; i++) {
+        for (i = xadj[vertexNum / numprocs] - 1; i < xadj[vertexNum / numprocs]; i++) {
             cout << adjcny[i] << " ";
         }
         cout << endl;
