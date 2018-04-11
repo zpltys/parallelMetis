@@ -2,8 +2,24 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <algorithm>
+#include <vector>
+using namespace std;
 
 char* prePath = "/mnt/nfs/zpltys/tempDir/";
+
+struct edge {
+    idx_t x, y;
+};
+
+bool cmp(const edge& a, const edge& b) {
+    if (a.x == b.x) {
+        return a.y < b.y;
+    } else {
+        return a.x < b.x;
+    }
+}
+
 int main (int argc, char *argv[])
 {
     int myid, numprocs, namelen;
@@ -15,16 +31,25 @@ int main (int argc, char *argv[])
     MPI_Comm_size (MPI_COMM_WORLD, &numprocs);      /* get number of processes */
     MPI_Get_processor_name(processor_name,&namelen);
 
-    if(myid == 0) printf("number of processes: %d\n",numprocs);
-    printf( "%s: Hello world from process %d \n", processor_name, myid);
 
-    char *path = new char[120];
+
+    char *path = new char[strlen(prePath) + 20];
     sprintf(path, "%sG.%d", prePath, myid);
     FILE* fp = fopen(path, "r");
 
     idx_t x, y;
+    vector<edge> e;
     while(~fscanf(fp, "%d%d", &x, &y)){
-        printf("x:%d y:%d\n", x, y);
+        edge tmp;
+        tmp.x = x; tmp.y = y;
+        e.push_back(tmp);
+    }
+    sort(e.begin(), e.end(), cmp);
+
+    if(myid == 0) {
+        for (vector<edge>::iterator it = e.begin(); it != e.end(); it++) {
+            printf("%d %d\n", it->x, it->y);
+        }
     }
     delete[] path;
     MPI_Finalize();
