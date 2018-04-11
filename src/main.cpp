@@ -22,28 +22,27 @@ bool cmp(const edge& a, const edge& b) {
     }
 }
 
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
     int myid, numprocs, namelen;
     int i, j;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
 
-    MPI_Init (&argc, &argv);        /* starts MPI */
-    MPI_Comm_rank (MPI_COMM_WORLD, &myid);  /* get current process id */
-    MPI_Comm_size (MPI_COMM_WORLD, &numprocs);      /* get number of processes */
-    MPI_Get_processor_name(processor_name,&namelen);
-
+    MPI_Init(&argc, &argv);        /* starts MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);  /* get current process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);      /* get number of processes */
+    MPI_Get_processor_name(processor_name, &namelen);
 
 
     char *path = new char[strlen(prePath) + 20];
     sprintf(path, "%sG.%d", prePath, myid);
-    FILE* fp = fopen(path, "r");
+    FILE *fp = fopen(path, "r");
 
     idx_t x, y;
     vector<edge> e;
-    while(~fscanf(fp, "%d%d", &x, &y)){
+    while (~fscanf(fp, "%d%d", &x, &y)) {
         edge tmp;
-        tmp.x = x; tmp.y = y;
+        tmp.x = x;
+        tmp.y = y;
         e.push_back(tmp);
     }
     sort(e.begin(), e.end(), cmp);
@@ -59,7 +58,8 @@ int main (int argc, char *argv[])
 
     for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     idx_t bx = vtxdist[myid];
-    i = 0; j = 0;
+    i = 0;
+    j = 0;
     xadj[j++] = 0;
     for (vector<edge>::iterator it = e.begin(); it != e.end(); it++) {
         x = it->x;
@@ -103,19 +103,20 @@ int main (int argc, char *argv[])
         cout << vtxdist[i] << " ";
     }
     cout << endl;
-        cout << "xadj: ";
-        for (i = vertexNum / numprocs; i <= vertexNum / numprocs; i++) {
-            cout << xadj[i] << " ";
-        }
-        cout << endl;
-        cout << "adjcny: ";
-        for (i = xadj[vertexNum / numprocs] - 1; i < xadj[vertexNum / numprocs]; i++) {
-            cout << adjcny[i] << " ";
-        }
-        cout << endl;
+    cout << "xadj: ";
+    for (i = vertexNum / numprocs; i <= vertexNum / numprocs; i++) {
+        cout << xadj[i] << " ";
+    }
+    cout << endl;
+    cout << "adjcny: ";
+    for (i = xadj[vertexNum / numprocs] - 1; i < xadj[vertexNum / numprocs]; i++) {
+        cout << adjcny[i] << " ";
+    }
+    cout << endl;
 
-    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, ncon, nparts, tpwgts, ubvec, options, edgecut, part, &comm);
-    for (i = 0; i < vertexNum / numprocs; i++) {
+    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, ncon, nparts, tpwgts, ubvec, options,
+                         edgecut, part, &comm);
+    for (i = 0; i <= vertexNum / numprocs; i++) {
         printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
     MPI_Finalize();
