@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, wgtflag, numflag, ncon, nparts, tpwgts, ubvec, options, edgecut, part, comm);
     for (i = 0; i < vertexNum / numprocs; i++) {
-        printf("part %d to %d", vtxdist[myid] + i, part[i]);
+        printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
     MPI_Finalize();
     return 0;
