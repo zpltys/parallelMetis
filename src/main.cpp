@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
@@ -49,7 +50,8 @@ int main (int argc, char *argv[])
 
     delete[] path;
 
-    idx_t *vtxdist, *xadj, *adjcny, *wgtflag, *numflag, *ncon, *nparts, *options, *edgecut, *part, *comm;
+    idx_t *vtxdist, *xadj, *adjcny, *wgtflag, *numflag, *ncon, *nparts, *options, *edgecut, *part;
+    MPI_Comm* comm;
     real_t *tpwgts, *ubvec;
     vtxdist = new idx_t[numprocs + 1];
     xadj = new idx_t[vertexNum / numprocs + 1];
@@ -93,9 +95,27 @@ int main (int argc, char *argv[])
     options[0] = 0;
     edgecut = new idx_t(0);
     part = new idx_t[vertexNum / numprocs];
-    comm = new idx_t(MPI_COMM_WORLD);
+    comm = new MPI_Comm(MPI_COMM_WORLD);
 
     printf("run func!\n");
+    if(myid == 1) {
+        cout << "vtxdist: ";
+        for (i = 0; i <= numprocs; i++) {
+            cout << vtxdist[i] << " ";
+        }
+        cout << endl;
+        cout << "xadj: ";
+        for (i = 0; i <= vertexNum / numprocs; i++) {
+            cout << xadj[i] << " ";
+        }
+        cout << endl;
+        cout << "adjcny: ";
+        for (i = 0; i < xadj[vertexNum / numprocs]; i++) {
+            cout << adjcny[i] << " ";
+        }
+        cout << endl;
+    }
+
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, wgtflag, numflag, ncon, nparts, tpwgts, ubvec, options, edgecut, part, comm);
     for (i = 0; i < vertexNum / numprocs; i++) {
         printf("part %d to %d", vtxdist[myid] + i, part[i]);
