@@ -18,7 +18,7 @@ int main (int argc, char *argv[])
     if(myid == 0) printf("number of processes: %d\n",numprocs);
     printf( "%s: Hello world from process %d \n", processor_name, myid);
 
-    char *path = new char[strlen(prePath) + 20];
+    char *path = new char[120];
     sprintf(path, "%sG.%d", prePath, myid);
     FILE* fp = fopen(path, "r");
 
@@ -26,7 +26,7 @@ int main (int argc, char *argv[])
     while(~fscanf(fp, "%d%d", &x, &y)){
         printf("x:%d y:%d\n", x, y);
     }
-
+    delete[] path;
     MPI_Finalize();
     return 0;
 }
