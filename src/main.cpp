@@ -95,6 +95,7 @@ int main (int argc, char *argv[]) {
     options[0] = 0;
     edgecut = new idx_t(0);
     part = new idx_t[vertexNum / numprocs];
+    part[vertexNum / numprocs - 1] = 1;
     comm = MPI_COMM_WORLD;
 
     printf("process %d run func!\n", myid);
