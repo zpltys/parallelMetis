@@ -47,11 +47,6 @@ int main (int argc, char *argv[])
     }
     sort(e.begin(), e.end(), cmp);
 
-    if(myid == 0) {
-        for (vector<edge>::iterator it = e.begin(); it != e.end(); it++) {
-            printf("%d %d\n", it->x, it->y);
-        }
-    }
     delete[] path;
 
     idx_t *vtxdist, *xadj, *adjcny, *wgtflag, *numflag, *ncon, *nparts, *options, *edgecut, *part, *comm;
@@ -99,6 +94,8 @@ int main (int argc, char *argv[])
     edgecut = new idx_t(0);
     part = new idx_t[vertexNum / numprocs];
     comm = new idx_t(MPI_COMM_WORLD);
+
+    printf("run func!\n");
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, wgtflag, numflag, ncon, nparts, tpwgts, ubvec, options, edgecut, part, comm);
     for (i = 0; i < vertexNum / numprocs; i++) {
         printf("part %d to %d", vtxdist[myid] + i, part[i]);
