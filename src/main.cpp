@@ -56,7 +56,6 @@ int main (int argc, char *argv[]) {
     xadj = new idx_t[vertexNum / numprocs + 1];
     adjcny = new idx_t[e.size() + 1];
 
-    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     idx_t bx = vtxdist[myid];
     i = 0;
     j = 0;
@@ -85,10 +84,10 @@ int main (int argc, char *argv[]) {
     ncon = 1;
     nparts = 4;
 
-    tpwgts = new real_t[1 * 4];
-    ubvec = new real_t[4];
-    for (i = 0; i < 1 * 4; i++) {
-        tpwgts[i] = 1.0 / 4;
+    tpwgts = new real_t[1 * numprocs];
+    ubvec = new real_t[numprocs];
+    for (i = 0; i < 1 * numprocs; i++) {
+        tpwgts[i] = 1.0 / numprocs;
         ubvec[i] = 1.05;
     }
     options = new idx_t[5];
@@ -122,6 +121,7 @@ int main (int argc, char *argv[]) {
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
+    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     for (i = 0; i <= vertexNum / numprocs; i++) {
         printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
