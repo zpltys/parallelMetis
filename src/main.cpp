@@ -85,7 +85,7 @@ int main (int argc, char *argv[]) {
     nparts = 4;
 
     tpwgts = new real_t[1 * numprocs + 10];
-    ubvec = new real_t[numprocs + 10;
+    ubvec = new real_t[numprocs + 10];
     for (i = 0; i < 1 * numprocs; i++) {
         tpwgts[i] = 1.0 / numprocs;
         ubvec[i] = 1.05;
