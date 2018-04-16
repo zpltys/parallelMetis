@@ -27,10 +27,10 @@ int main (int argc, char *argv[]) {
     int i, j;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
 
-   // MPI_Init(&argc, &argv);        /* starts MPI */
-   // MPI_Comm_rank(MPI_COMM_WORLD, &myid);  /* get current process id */
-   // MPI_Comm_size(MPI_COMM_WORLD, &numprocs);      /* get number of processes */
-   // MPI_Get_processor_name(processor_name, &namelen);
+    MPI_Init(&argc, &argv);        /* starts MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);  /* get current process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);      /* get number of processes */
+    MPI_Get_processor_name(processor_name, &namelen);
 
 
     char *path = new char[strlen(prePath) + 20];
@@ -122,6 +122,6 @@ int main (int argc, char *argv[]) {
     }
     delete[] vtxdist;
 
-  //  MPI_Finalize();
+    MPI_Finalize();
     return 0;
 }
