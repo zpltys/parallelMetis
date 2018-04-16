@@ -104,7 +104,7 @@ int main (int argc, char *argv[]) {
         cout << vtxdist[i] << " ";
     }
     cout << endl;
-    if (myid == 1) {
+   /* if (myid == 1) {
         cout << "xadj: ";
         for (i = 0; i <= vertexNum / numprocs; i++) {
             cout << xadj[i] << " ";
@@ -118,7 +118,7 @@ int main (int argc, char *argv[]) {
             cout << endl;
         }
         cout << endl;
-    }
+    }*/
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
