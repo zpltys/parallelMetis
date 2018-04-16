@@ -55,6 +55,7 @@ int main (int argc, char *argv[]) {
     vtxdist = new idx_t[numprocs + 3];
     xadj = new idx_t[vertexNum / numprocs + 3];
     adjcny = new idx_t[e.size() + 3];
+    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
 
     idx_t bx = vtxdist[myid];
     i = 0;
@@ -98,11 +99,6 @@ int main (int argc, char *argv[]) {
     comm = MPI_COMM_WORLD;
 
     printf("process %d run func!\n", myid);
-    cout << "vtxdist: ";
-    for (i = 0; i <= numprocs; i++) {
-        cout << vtxdist[i] << " ";
-    }
-    cout << endl;
    /* if (myid == 1) {
         cout << "xadj: ";
         for (i = 0; i <= vertexNum / numprocs; i++) {
@@ -118,10 +114,15 @@ int main (int argc, char *argv[]) {
         }
         cout << endl;
     }*/
-    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
+    cout << "vtxdist: ";
+    for (i = 0; i <= numprocs; i++) {
+        cout << vtxdist[i] << " ";
+    }
+    cout << endl;
+
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
-    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
+    //for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     for (i = 0; i <= vertexNum / numprocs; i++) {
         printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
