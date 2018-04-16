@@ -8,7 +8,9 @@
 using namespace std;
 
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
-const int vertexNum = 32768;
+//const int vertexNum = 32768;
+const int vertexNum = 16;
+const int PART = 4;
 
 struct edge {
     idx_t x, y;
@@ -83,7 +85,7 @@ int main (int argc, char *argv[]) {
     wgtflag = 0;
     numflag = 0;
     ncon = 1;
-    nparts = 4;
+    nparts = PART;
 
     tpwgts = new real_t[1 * numprocs + 10];
     ubvec = new real_t[numprocs + 10];
@@ -99,21 +101,21 @@ int main (int argc, char *argv[]) {
     comm = MPI_COMM_WORLD;
 
     printf("process %d run func!\n", myid);
-   /* if (myid == 1) {
-        cout << "xadj: ";
-        for (i = 0; i <= vertexNum / numprocs; i++) {
-            cout << xadj[i] << " ";
+
+    cout << "xadj: ";
+    for (i = 0; i <= vertexNum / numprocs; i++) {
+        cout << xadj[i] << " ";
+    }
+    cout << endl;
+    cout << "adjcny: ";
+    for (i = 0; i < vertexNum / numprocs; i++) {
+        for (j = xadj[i]; j < xadj[i + 1]; j++) {
+            cout << adjcny[j] << " ";
         }
         cout << endl;
-        cout << "adjcny: ";
-        for (i = 0; i < vertexNum / numprocs; i++) {
-            for (j = xadj[i]; j < xadj[i + 1]; j++) {
-                cout << adjcny[j] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }*/
+    }
+    cout << endl;
+
     cout << "vtxdist: ";
     for (i = 0; i <= numprocs; i++) {
         cout << vtxdist[i] << " ";
