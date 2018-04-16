@@ -104,16 +104,21 @@ int main (int argc, char *argv[]) {
         cout << vtxdist[i] << " ";
     }
     cout << endl;
-    cout << "xadj: ";
-    for (i = vertexNum / numprocs; i <= vertexNum / numprocs; i++) {
-        cout << xadj[i] << " ";
+    if (myid == 1) {
+        cout << "xadj: ";
+        for (i = 0; i <= vertexNum / numprocs; i++) {
+            cout << xadj[i] << " ";
+        }
+        cout << endl;
+        cout << "adjcny: ";
+        for (i = 0; i < vertexNum / numprocs; i++) {
+            for (j = xadj[i]; j < xadj[i + 1]; j++) {
+                cout << adjcny[j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
     }
-    cout << endl;
-    cout << "adjcny: ";
-    for (i = xadj[vertexNum / numprocs] - 1; i < xadj[vertexNum / numprocs]; i++) {
-        cout << adjcny[i] << " ";
-    }
-    cout << endl;
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
