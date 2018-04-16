@@ -52,9 +52,9 @@ int main (int argc, char *argv[]) {
     idx_t *vtxdist, *xadj, *adjcny, wgtflag, numflag, ncon, nparts, *options, edgecut, *part;
     MPI_Comm comm;
     real_t *tpwgts, *ubvec;
-    vtxdist = new idx_t[numprocs + 1];
-    xadj = new idx_t[vertexNum / numprocs + 1];
-    adjcny = new idx_t[e.size() + 1];
+    vtxdist = new idx_t[numprocs + 3];
+    xadj = new idx_t[vertexNum / numprocs + 3];
+    adjcny = new idx_t[e.size() + 3];
 
     idx_t bx = vtxdist[myid];
     i = 0;
@@ -84,8 +84,8 @@ int main (int argc, char *argv[]) {
     ncon = 1;
     nparts = 4;
 
-    tpwgts = new real_t[1 * numprocs];
-    ubvec = new real_t[numprocs];
+    tpwgts = new real_t[1 * numprocs + 10];
+    ubvec = new real_t[numprocs + 10;
     for (i = 0; i < 1 * numprocs; i++) {
         tpwgts[i] = 1.0 / numprocs;
         ubvec[i] = 1.05;
@@ -93,7 +93,7 @@ int main (int argc, char *argv[]) {
     options = new idx_t[5];
     options[0] = 0;
     edgecut = 0;
-    part = new idx_t[vertexNum / numprocs];
+    part = new idx_t[vertexNum / numprocs + 10];
     part[vertexNum / numprocs - 1] = 1;
     comm = MPI_COMM_WORLD;
 
@@ -118,7 +118,7 @@ int main (int argc, char *argv[]) {
         }
         cout << endl;
     }*/
-
+    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
     for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
