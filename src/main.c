@@ -7,7 +7,7 @@
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
 //const int vertexNum = 32768;
 const int vertexNum = 16;
-const int PART = 4;
+const int PART = 2;
 
 struct Edge {
     idx_t x, y;
@@ -110,6 +110,9 @@ int main (int argc, char *argv[]) {
     comm = MPI_COMM_WORLD;
 
     printf("process %d run func!\n", myid);
+
+    xadj = {0,1,1,3,3,4,4,4,4,6,6,6,6,8,8,8,8};
+    adjcny = {0,1,1,3,3,4,4,4};
 
     printf("xadj:\n");
     for (i = 0; i <= vertexNum / numprocs; i++) {
