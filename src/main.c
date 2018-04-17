@@ -1,32 +1,33 @@
 #include "../include/parmetis.h"
-#include <cstdio>
-#include <cstring>
-#include <string>
-#include <algorithm>
-#include <vector>
-#include <iostream>
-using namespace std;
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <malloc.h>
 
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
 //const int vertexNum = 32768;
 const int vertexNum = 16;
 const int PART = 4;
 
-struct edge {
+struct Edge {
     idx_t x, y;
 };
+typedef struct Edge edge;
 
-bool cmp(const edge& a, const edge& b) {
-    if (a.x == b.x) {
-        return a.y < b.y;
+int cmp(const void* l, const void* r) {
+    edge* a, b;
+    a = (edge*)l;
+    b = (edge*)r;
+    if (a->x == b->x) {
+        return a->y - b->y;
     } else {
-        return a.x < b.x;
+        return a->x - b->x;
     }
 }
 
 int main (int argc, char *argv[]) {
     int myid, numprocs, namelen;
-    int i, j;
+    int i, j, n;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
 
     MPI_Init(&argc, &argv);        /* starts MPI */
@@ -35,35 +36,39 @@ int main (int argc, char *argv[]) {
     MPI_Get_processor_name(processor_name, &namelen);
 
 
-    char *path = new char[strlen(prePath) + 20];
+    char *path = (char*) malloc((strlen(prePath) + 20) * sizeof(char));
     sprintf(path, "%sG.%d", prePath, myid);
     FILE *fp = fopen(path, "r");
 
     idx_t x, y;
-    vector<edge> e;
+    edge* e;
+    e = (edge*)(malloc(1000 * sizeof(edge)));
+    i = 0;
     while (~fscanf(fp, "%d%d", &x, &y)) {
-        edge tmp;
-        tmp.x = x;
-        tmp.y = y;
-        e.push_back(tmp);
+        e[i].x = x;
+        e[i].y = y;
+        i++;
     }
-    sort(e.begin(), e.end(), cmp);
+    qsort(e, i, sizeof(edge), cmp());
+    n = i;
 
-    delete[] path;
+   // delete[] path;
 
     idx_t *vtxdist, *xadj, *adjcny, wgtflag, numflag, ncon, nparts, *options, edgecut, *part;
     MPI_Comm comm;
     real_t *tpwgts, *ubvec;
-    vtxdist = new idx_t[numprocs + 3];
-    xadj = new idx_t[vertexNum / numprocs + 3];
-    adjcny = new idx_t[e.size() + 3];
+    vtxdist = (idx_t*)malloc((numprocs + 3) * sizeof(idx_t));
+    xadj = (idx_t*)malloc((vertexNum / numprocs + 3) * sizeof(idx_t));
+    adjcny = (idx_t*)malloc((n + 3) * sizeof(idx_t));
     for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
 
     idx_t bx = vtxdist[myid];
     i = 0;
     j = 0;
     xadj[j++] = 0;
-    for (vector<edge>::iterator it = e.begin(); it != e.end(); it++) {
+    edge *it;
+    for (i = 0; i < n; i++) {
+        it = e + i;
         x = it->x;
         y = it->y;
         if (bx == x) {
@@ -87,40 +92,38 @@ int main (int argc, char *argv[]) {
     ncon = 1;
     nparts = PART;
 
-    tpwgts = new real_t[1 * numprocs + 10];
-    ubvec = new real_t[numprocs + 10];
+    //tpwgts = new real_t[1 * numprocs + 10];
+    tpwgts = (real_t*)malloc(1 * (numprocs + 10) * sizeof(real_t));
+    ubvec = (real_t*)malloc((numprocs + 10) * sizeof(real_t));
     for (i = 0; i < 1 * numprocs; i++) {
         tpwgts[i] = 1.0 / numprocs;
         ubvec[i] = 1.05;
     }
-    options = new idx_t[5];
+    options = (idx_t*)malloc(5 * sizeof(idx_t));
     options[0] = 0;
     edgecut = 0;
-    part = new idx_t[vertexNum / numprocs + 10];
+    part = (idx_t*)malloc((vertexNum / numprocs + 10) * sizeof(idx_t));
     part[vertexNum / numprocs - 1] = 1;
     comm = MPI_COMM_WORLD;
 
     printf("process %d run func!\n", myid);
 
-    cout << "xadj: ";
+    printf("xadj:\n");
     for (i = 0; i <= vertexNum / numprocs; i++) {
-        cout << xadj[i] << " ";
+        printf("%d ", xadj[i]);
     }
-    cout << endl;
-    cout << "adjcny: " << endl;
+    printf("\nadjcny:\n");
     for (i = 0; i < vertexNum / numprocs; i++) {
         for (j = xadj[i]; j < xadj[i + 1]; j++) {
-            cout << adjcny[j] << " ";
+            printf("%d ", adjcny[j]);
         }
-        cout << endl;
+        printf("\n");
     }
-    cout << endl;
-
-    cout << "vtxdist: ";
+    printf("vtxdist:");
     for (i = 0; i <= numprocs; i++) {
-        cout << vtxdist[i] << " ";
+        printf("%d ", vtxdist[i]);
     }
-    cout << endl;
+    printf("\n");
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
@@ -128,7 +131,6 @@ int main (int argc, char *argv[]) {
     for (i = 0; i <= vertexNum / numprocs; i++) {
         printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
-    delete[] vtxdist;
 
     MPI_Finalize();
     return 0;
