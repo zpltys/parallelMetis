@@ -107,7 +107,7 @@ int main (int argc, char *argv[]) {
         cout << xadj[i] << " ";
     }
     cout << endl;
-    cout << "adjcny: ";
+    cout << "adjcny: " << endl;
     for (i = 0; i < vertexNum / numprocs; i++) {
         for (j = xadj[i]; j < xadj[i + 1]; j++) {
             cout << adjcny[j] << " ";
