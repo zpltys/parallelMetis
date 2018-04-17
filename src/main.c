@@ -98,8 +98,8 @@ int main (int argc, char *argv[]) {
     //tpwgts = new real_t[1 * numprocs + 10];
     tpwgts = (real_t*)malloc(1 * (numprocs + 10) * sizeof(real_t));
     ubvec = (real_t*)malloc((numprocs + 10) * sizeof(real_t));
-    for (i = 0; i < 1 * numprocs; i++) {
-        tpwgts[i] = 1.0 / numprocs;
+    for (i = 0; i < 1 * nparts; i++) {
+        tpwgts[i] = 1.0 / nparts;
         ubvec[i] = 1.05;
     }
     options = (idx_t*)malloc(5 * sizeof(idx_t));
