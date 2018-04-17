@@ -15,7 +15,7 @@ struct Edge {
 typedef struct Edge edge;
 
 int cmp(const void* l, const void* r) {
-    edge* a, b;
+    edge *a, *b;
     a = (edge*)l;
     b = (edge*)r;
     if (a->x == b->x) {
