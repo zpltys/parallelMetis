@@ -107,7 +107,7 @@ int main (int argc, char *argv[]) {
     edgecut = 0;
     part = (idx_t*)malloc((vertexNum / numprocs + 10) * sizeof(idx_t));
     part[vertexNum / numprocs - 1] = 1;
-    comm = MPI_COMM_WORLD;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
     printf("process %d run func!\n", myid);
 
