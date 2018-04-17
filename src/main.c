@@ -49,6 +49,7 @@ int main (int argc, char *argv[]) {
         e[i].y = y;
         i++;
     }
+    printf("i:%d\n", i);
     qsort(e, i, sizeof(edge), cmp);
     n = i;
 
