@@ -49,7 +49,7 @@ int main (int argc, char *argv[]) {
         e[i].y = y;
         i++;
     }
-    qsort(e, i, sizeof(edge), cmp());
+    qsort(e, i, sizeof(edge), cmp);
     n = i;
 
    // delete[] path;
