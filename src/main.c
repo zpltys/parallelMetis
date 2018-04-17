@@ -1,9 +1,11 @@
 #include "../include/parmetis.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
 
 const char* prePath = "/mnt/nfs/zpltys/tempDir/";
+//const int vertexNum = 32768;
 const int vertexNum = 16;
 const int PART = 2;
 
@@ -23,98 +25,111 @@ int cmp(const void* l, const void* r) {
     }
 }
 
-int main(int argc, char *argv[])
-{
-    idx_t mype, npes;
-    MPI_Comm comm;
-
-    MPI_Init(&argc, &argv);
-    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-    MPI_Comm_size(comm, &npes);
-    MPI_Comm_rank(comm, &mype);
-
-    if (argc != 2 && argc != 3) {
-        if (mype == 0)
-            printf("Usage: %s <graph-file> [coord-file]\n", argv[0]);
-
-        MPI_Finalize();
-        exit(0);
-    }
-
-    TestParMetis_GPart(argv[1], (argc == 3 ? argv[2] : NULL), comm);
-
-    MPI_Comm_free(&comm);
-
-    MPI_Finalize();
-
-    return 0;
-}
-
-
-
-/***********************************************************************************/
-/*! This function tests the various graph partitioning and ordering routines */
-/***********************************************************************************/
-void TestParMetis_GPart(char *filename, char *xyzfile, MPI_Comm comm) {
-    idx_t ncon, nparts, npes, mype, opt2, realcut;
-    graph_t graph, mgraph;
-    idx_t *part, *mpart, *savepart, *order, *sizes;
-    idx_t numflag = 0, wgtflag = 0, options[10], edgecut, ndims;
-    real_t ipc2redist, *xyz = NULL, *tpwgts = NULL, ubvec[MAXNCON];
-
+int main (int argc, char *argv[]) {
     int myid, numprocs, namelen;
+    int i, j, n;
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
 
-    MPI_Comm_size(comm, &npes);
-    MPI_Comm_rank(comm, &mype);
-
+    MPI_Init(&argc, &argv);        /* starts MPI */
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);  /* get current process id */
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);      /* get number of processes */
-
-    ParallelReadGraph(&graph, filename, comm);
-    MPI_Barrier(comm);
-
-    part = imalloc(graph.nvtxs, "TestParMetis_V3: part");
-    tpwgts = rmalloc(MAXNCON * npes * 2, "TestParMetis_V3: tpwgts");
-    rset(MAXNCON, 1.05, ubvec);
-
-    graph.vwgt = ismalloc(graph.nvtxs * 5, 1, "TestParMetis_GPart: vwgt");
+    MPI_Get_processor_name(processor_name, &namelen);
 
 
-    /*======================================================================
-     *     / ParMETIS_V3_PartKway
-     *         /=======================================================================*/
-    options[0] = 1;
-    options[1] = 3;
-    options[2] = 1;
+    char *path = (char*) malloc((strlen(prePath) + 20) * sizeof(char));
+    sprintf(path, "%sG.%d", prePath, myid);
+    FILE *fp = fopen(path, "r");
+
+    idx_t x, y;
+    edge* e;
+    e = (edge*)(malloc(1000 * sizeof(edge)));
+    i = 0;
+    while (~fscanf(fp, "%d%d", &x, &y)) {
+        e[i].x = x;
+        e[i].y = y;
+        i++;
+    }
+    //printf("i:%d\n", i);
+    qsort(e, i, sizeof(edge), cmp);
+    n = i;
+
+    // delete[] path;
+
+    idx_t *vtxdist, *xadj, *adjcny, wgtflag, numflag, ncon, nparts, *options, edgecut, *part;
+    MPI_Comm comm;
+    real_t *tpwgts, *ubvec;
+    vtxdist = (idx_t*)malloc((numprocs + 3) * sizeof(idx_t));
+    xadj = (idx_t*)malloc((vertexNum / numprocs + 3) * sizeof(idx_t));
+    adjcny = (idx_t*)malloc((n + 3) * sizeof(idx_t));
+    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
+
+    idx_t bx = vtxdist[myid];
+    i = 0;
+    j = 0;
+    int k = 0;
+    xadj[j++] = 0;
+    edge *it;
+    for (k = 0; k < n; k++) {
+        it = e + k;
+        printf("x:%d y:%d\n", it->x, it->y);
+        x = it->x;
+        y = it->y;
+        if (bx == x) {
+            if (y == adjcny[i - 1]) continue;
+            adjcny[i++] = y;
+        } else {
+            while (bx < x) {
+                bx++;
+                xadj[j++] = i;
+            }
+            adjcny[i++] = y;
+        }
+    }
+    while (bx < vtxdist[myid + 1]) {
+        bx++;
+        xadj[j++] = i;
+    }
+
     wgtflag = 0;
     numflag = 0;
-    edgecut = 0;
-
-    nparts = 2;
     ncon = 1;
-    if (ncon > 1 && nparts > 1)
-        Mc_AdaptGraph(&graph, part, ncon, nparts, comm);
-    else
-        iset(graph.nvtxs, 1, graph.vwgt);
+    nparts = PART;
 
-    if (mype == 0)
-        printf("\nTesting ParMETIS_V3_PartKway with ncon: %"PRIDX", nparts: %"PRIDX"\n", ncon, nparts);
+    //tpwgts = new real_t[1 * numprocs + 10];
+    tpwgts = (real_t*)malloc(1 * (numprocs + 10) * sizeof(real_t));
+    ubvec = (real_t*)malloc((numprocs + 10) * sizeof(real_t));
+    for (i = 0; i < 1 * numprocs; i++) {
+        tpwgts[i] = 1.0 / numprocs;
+        ubvec[i] = 1.05;
+    }
+    options = (idx_t*)malloc(5 * sizeof(idx_t));
+    options[0] = 0;
+    edgecut = 0;
+    part = (idx_t*)malloc((vertexNum / numprocs + 10) * sizeof(idx_t));
+    part[vertexNum / numprocs - 1] = 1;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
-    rset(nparts * ncon, 1.0 / (real_t) nparts, tpwgts);
+    printf("process %d run func!\n", myid);
 
-    int i, n, j;
+   /* idx_t temp1[] = {0,1,1,3,3,4,4,4,4,6,6,6,6,8,8,8,8};
+    xadj = temp1;
+    idx_t temp2[] = {5,2,3,1,3,13,1,8};
+    adjcny = temp2;
+*/
+
+
     printf("vtxdist:\n");
     for (i = 0; i < 2; i++) {
-        printf("%d ", graph.vtxdist[i]);
+        printf("%d ", vtxdist[i]);
     }
 
     printf("\nxadj\n");
-    for (i = 0; i <= graph.vtxdist[1]; i++) {
-        printf("%d ", graph.xadj[i]);
+    for (i = 0; i <= vtxdist[1]; i++) {
+        printf("%d ", xadj[i]);
     }
     printf("\nadjcny\n");
-    for (i = 0; i < graph.xadj[graph.vtxdist[1]]; i++) {
-        printf("%d ", graph.adjncy[i]);
+    for (i = 0; i < xadj[vtxdist[1]]; i++) {
+        printf("%d ", adjcny[i]);
     }
 
     printf("\nwgtflag:%d\n", wgtflag);
@@ -137,78 +152,13 @@ void TestParMetis_GPart(char *filename, char *xyzfile, MPI_Comm comm) {
 
 
 
-    char *path = (char*) malloc((strlen(prePath) + 20) * sizeof(char));
-    sprintf(path, "%sG.%d", prePath, myid);
-    FILE *fp = fopen(path, "r");
-
-    int xx, yy;
-    edge* e;
-    e = (edge*)(malloc(1000 * sizeof(edge)));
-    i = 0;
-    while (~fscanf(fp, "%d%d", &xx, &yy)) {
-        e[i].x = xx;
-        e[i].y = yy;
-        i++;
-    }
-    qsort(e, i, sizeof(edge), cmp);
-    n = i;
-
-    idx_t *vtxdist, *xadj, *adjcny;
-    vtxdist = (idx_t*)malloc((numprocs + 3) * sizeof(idx_t));
-    xadj = (idx_t*)malloc((vertexNum / numprocs + 3) * sizeof(idx_t));
-    adjcny = (idx_t*)malloc((n + 3) * sizeof(idx_t));
-    for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
-
-    int bx = 0;
-    i = 0;
-    j = 0;
-    int k = 0;
-    xadj[j++] = 0;
-    edge *it;
-    for (k = 0; k < n; k++) {
-        it = e + k;
-        printf("x:%d y:%d\n", it->x, it->y);
-        xx = it->x;
-        yy = it->y;
-        if (bx == xx) {
-            if (i >0 && yy == adjcny[i - 1]) continue;
-            adjcny[i++] = yy;
-        } else {
-            while (bx < xx) {
-                bx++;
-                xadj[j++] = i;
-            }
-            adjcny[i++] = yy;
-        }
-    }
-    while (bx < vtxdist[myid + 1]) {
-        bx++;
-        xadj[j++] = i;
-    }
-
-
-    printf("\nxadj\n");
-    for (i = 0; i <= vtxdist[1]; i++) {
-        printf("%d ", xadj[i]);
-    }
-    printf("\nadjcny\n");
-    for (i = 0; i < xadj[vtxdist[1]]; i++) {
-        printf("%d ", adjcny[i]);
-    }
-
-
-
-
-    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL,
-                         NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
+    ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
-
-    printf("edgecut:%d\n", edgecut);
-    printf("part:\n");
-    for (i = 0; i < 16; i++) {
-        printf("%d ", part[i]);
+    //for (i = 0; i <= numprocs; i++) vtxdist[i] = vertexNum / numprocs * i;
+    for (i = 0; i <= vertexNum / numprocs; i++) {
+        printf("part %d to %d\n", vtxdist[myid] + i, part[i]);
     }
-    printf("\n");
-    return;
 
+    MPI_Finalize();
+    return 0;
 }
