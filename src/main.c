@@ -69,6 +69,7 @@ int main (int argc, char *argv[]) {
     edge *it;
     for (i = 0; i < n; i++) {
         it = e + i;
+        printf("x:%d y:%d\n", it->x, it->y);
         x = it->x;
         y = it->y;
         if (bx == x) {
