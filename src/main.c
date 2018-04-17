@@ -49,7 +49,7 @@ int main (int argc, char *argv[]) {
         e[i].y = y;
         i++;
     }
-    printf("i:%d\n", i);
+    //printf("i:%d\n", i);
     qsort(e, i, sizeof(edge), cmp);
     n = i;
 
@@ -66,10 +66,11 @@ int main (int argc, char *argv[]) {
     idx_t bx = vtxdist[myid];
     i = 0;
     j = 0;
+    int k = 0;
     xadj[j++] = 0;
     edge *it;
-    for (i = 0; i < n; i++) {
-        it = e + i;
+    for (k = 0; k < n; k++) {
+        it = e + k;
         printf("x:%d y:%d\n", it->x, it->y);
         x = it->x;
         y = it->y;
