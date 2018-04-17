@@ -103,7 +103,9 @@ int main (int argc, char *argv[]) {
         ubvec[i] = 1.05;
     }
     options = (idx_t*)malloc(5 * sizeof(idx_t));
-    options[0] = 0;
+    options[0] = 1;
+    options[1] = 3;
+    options[2] = 1;
     edgecut = 0;
     part = (idx_t*)malloc((vertexNum / numprocs + 10) * sizeof(idx_t));
     part[vertexNum / numprocs - 1] = 1;
