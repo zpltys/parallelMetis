@@ -113,25 +113,44 @@ int main (int argc, char *argv[]) {
 
     idx_t temp1[] = {0,1,1,3,3,4,4,4,4,6,6,6,6,8,8,8,8};
     xadj = temp1;
-    idx_t temp2[] = {0,1,1,3,3,4,4,4};
+    idx_t temp2[] = {5,2,3,1,3,13,1,8};
     adjcny = temp2;
 
-    printf("xadj:\n");
-    for (i = 0; i <= vertexNum / numprocs; i++) {
-        printf("%d ", xadj[i]);
-    }
-    printf("\nadjcny:\n");
-    for (i = 0; i < vertexNum / numprocs; i++) {
-        for (j = xadj[i]; j < xadj[i + 1]; j++) {
-            printf("%d ", adjcny[j]);
-        }
-        printf("\n");
-    }
-    printf("vtxdist:");
-    for (i = 0; i <= numprocs; i++) {
+
+
+    printf("vtxdist:\n");
+    for (i = 0; i < 2; i++) {
         printf("%d ", vtxdist[i]);
     }
+
+    printf("\nxadj\n");
+    for (i = 0; i <= vtxdist[1]; i++) {
+        printf("%d ", xadj[i]);
+    }
+    printf("\nadjcny\n");
+    for (i = 0; i < xadj[vtxdist[1]]; i++) {
+        printf("%d ", adjcny[i]);
+    }
+
+    printf("\nwgtflag:%d\n", wgtflag);
+    printf("numflag:%d\n", numflag);
+    printf("ncon:%d\n", ncon);
+    printf("nparts:%d\n", nparts);
+    printf("tpwgts:\n");
+    for (i = 0; i < nparts * ncon; i++) {
+        printf("%f ", tpwgts[i]);
+    }
+    printf("\nubvec:\n");
+    for (i = 0; i < ncon; i++) {
+        printf("%f ", ubvec[i]);
+    }
+    printf("\noptions:\n");
+    for (i = 0; i < 3; i++) {
+        printf("%d ", options[i]);
+    }
     printf("\n");
+
+
 
     ParMETIS_V3_PartKway(vtxdist, xadj, adjcny, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts, tpwgts, ubvec, options,
                          &edgecut, part, &comm);
