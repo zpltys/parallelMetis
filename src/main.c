@@ -111,8 +111,10 @@ int main (int argc, char *argv[]) {
 
     printf("process %d run func!\n", myid);
 
-    xadj = {0,1,1,3,3,4,4,4,4,6,6,6,6,8,8,8,8};
-    adjcny = {0,1,1,3,3,4,4,4};
+    idx_t temp1[] = {0,1,1,3,3,4,4,4,4,6,6,6,6,8,8,8,8};
+    xadj = temp1;
+    idx_t temp2[] = {0,1,1,3,3,4,4,4};
+    adjcny = temp2;
 
     printf("xadj:\n");
     for (i = 0; i <= vertexNum / numprocs; i++) {
